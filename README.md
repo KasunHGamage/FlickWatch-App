@@ -38,30 +38,37 @@ Create a `.env` file in the project root:
 
 ```env
 EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key_here
+```
 
-⚠️ Important:
-The .env file is ignored by GitHub and should never be committed.
+⚠️ Important: The `.env` file is ignored by GitHub and should never be committed.
 
+---
 
-🚀 Getting Started
+## 🚀 Getting Started
 
 1️⃣ Clone the repository
 
+```bash
 git clone https://github.com/KasunHGamage/FlickWatch.git
 cd FlickWatch
+```
 
 2️⃣ Install dependencies
 
+```bash
 npm install
+```
 
 3️⃣ Start the app
 
+```bash
 npx expo start
+```
 
-	•	Scan the QR code using Expo Go on your phone
-	•	Or run on an Android emulator / iOS simulator
+- Scan the QR code using Expo Go on your phone
+- Or run on an Android emulator / iOS simulator
 
-⸻
+---
 
 ## 📸 Screenshots
 
@@ -77,36 +84,36 @@ npx expo start
 ### ❤️ Watchlist Screen
 <img src="./screenshots/watchlist.png" alt="Watchlist Screen" width="250"/>
 
-⸻
+---
 
-🧠 Learning Outcomes
-	•	API integration in React Native
-	•	Building reusable UI components
-	•	Global state management using Context API
-	•	Navigation using Stack & Bottom Tabs
-	•	Implementing a clean dark-mode UI
-	•	Handling loading, error, and empty states
+## 🧠 Learning Outcomes
 
-⸻
-
-🎯 Future Improvements
-	•	User authentication
-	•	Cloud-synced watchlist
-	•	Pagination & infinite scrolling
-	•	Genre-based filtering
-	•	Trailer playback support
-
-⸻
-
-👨‍💻 Author
-
-Kasun Harsha
-🔗 GitHub: https://github.com/KasunHGamage
-
-⸻
-
-📄 License
-
-This project is created for learning and portfolio purposes.
+- API integration in React Native
+- Building reusable UI components
+- Global state management using Context API
+- Navigation using Stack & Bottom Tabs
+- Implementing a clean dark-mode UI
+- Handling loading, error, and empty states
 
 ---
+
+## 🎯 Future Improvements
+
+- User authentication
+- Cloud-synced watchlist
+- Pagination & infinite scrolling
+- Genre-based filtering
+- Trailer playback support
+
+---
+
+## 👨‍💻 Author
+
+Kasun Harsha  
+🔗 GitHub: https://github.com/KasunHGamage
+
+---
+
+## 📄 License
+
+This project is created for learning and portfolio purposes.
