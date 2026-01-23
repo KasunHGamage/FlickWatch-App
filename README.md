@@ -30,32 +30,6 @@ Users can browse popular content, explore trending movies and TV shows, search t
 
 ---
 
-## 📂 Project Structure
-
-src/
-├── components/
-│   └── movie/
-│       └── MediaCard.js
-│
-├── navigation/
-│   ├── RootNavigator.js
-│   └── TabsNavigator.js
-│
-├── screens/
-│   ├── HomeScreen.js
-│   ├── SearchScreen.js
-│   ├── DetailScreen.js
-│   └── WatchlistScreen.js
-│
-├── services/
-│   └── tmdb.js
-│
-└── state/
-└── watchlist/
-└── WatchlistContext.js
-
----
-
 ## 🔑 Environment Variables
 
 This project uses environment variables to keep API keys secure.
