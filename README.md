@@ -1,10 +1,3 @@
-Got you 👍
-Here is the FULL, clean, corrected README.md you should use.
-You can replace your entire current file with this.
-
-⸻
-
-
 # 🎬 FlickWatch
 
 FlickWatch is a modern **movie & TV discovery mobile app** built using **React Native (Expo)** and powered by the **TMDB API**.  
