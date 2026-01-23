@@ -42,7 +42,6 @@ EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key_here
 ⚠️ Important:
 The .env file is ignored by GitHub and should never be committed.
 
-⸻
 
 🚀 Getting Started
 
@@ -64,15 +63,19 @@ npx expo start
 
 ⸻
 
-📸 Screenshots
+## 📸 Screenshots
 
-(Screenshots will be added soon)
+### 🏠 Home Screen
+<img src="./screenshots/home.png" alt="Home Screen" width="250"/>
 
-Suggested screens:
-	•	Home Screen
-	•	Search Screen
-	•	Detail Screen
-	•	Watchlist Screen
+### 🔍 Search Screen
+<img src="./screenshots/search.png" alt="Search Screen" width="250"/>
+
+### 🎬 Detail Screen
+<img src="./screenshots/detail.png" alt="Detail Screen" width="250"/>
+
+### ❤️ Watchlist Screen
+<img src="./screenshots/watchlist.png" alt="Watchlist Screen" width="250"/>
 
 ⸻
 
