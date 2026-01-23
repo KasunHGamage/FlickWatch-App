@@ -71,17 +71,27 @@ npx expo start
 ---
 
 ## 📸 Screenshots
-## 📸 Screenshots
 
-<p align="center">
-  <img src="./screenshots/home.PNG" width="220" />
-  <img src="./screenshots/search.PNG" width="220" />
-  <img src="./screenshots/detail.PNG" width="220" />
-</p>
-
+### 🏠 Home Screen
 <p align="left">
-  <img src="./screenshots/watchlist.PNG" width="220" />
+  <img src="./screenshots/home.PNG" alt="Home Screen" width="260" />
 </p>
+
+### 🔍 Search Screen
+<p align="left">
+  <img src="./screenshots/search.PNG" alt="Search Screen" width="260" />
+</p>
+
+### 🎬 Detail Screen
+<p align="left">
+  <img src="./screenshots/detail.PNG" alt="Detail Screen" width="260" />
+</p>
+
+### ❤️ Watchlist Screen
+<p align="left">
+  <img src="./screenshots/watchlist.PNG" alt="Watchlist Screen" width="260" />
+</p>
+
 
 ## 🧠 Learning Outcomes
 
