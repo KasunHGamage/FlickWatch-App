@@ -71,6 +71,7 @@ npx expo start
 ---
 
 ## 📸 Screenshots
+
 <p align="center">
   <img src="./screenshots/home.PNG" width="220" />
   <img src="./screenshots/search.PNG" width="220" />
