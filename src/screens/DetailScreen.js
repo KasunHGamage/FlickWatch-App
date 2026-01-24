@@ -7,21 +7,38 @@ import {
   TouchableOpacity,
   ScrollView,
   Image,
+  FlatList,
 } from 'react-native';
 import { SafeAreaView } from 'react-native-safe-area-context';
 import * as Haptics from 'expo-haptics';
 import { tmdb, img } from '../services/tmdb';
 import { useWatchlist } from '../state/watchlist/WatchlistContext';
+import DetailSkeleton from '../components/skeleton/DetailSkeleton';
+import { useTheme } from '../state/theme/ThemeContext';
+import { darkTheme, lightTheme } from '../state/theme/colors';
 
 function normalizeDetails(raw, type) {
   const isMovie = type === 'movie';
   const title = isMovie
     ? raw?.title || raw?.original_title || 'Untitled'
     : raw?.name || raw?.original_name || 'Untitled';
+
   const date = isMovie ? raw?.release_date : raw?.first_air_date;
   const year = date ? String(date).slice(0, 4) : '';
   const rating = typeof raw?.vote_average === 'number' ? raw.vote_average : null;
-  const genres = Array.isArray(raw?.genres) ? raw.genres.map((g) => g?.name).filter(Boolean) : [];
+
+  // runtime: movies have `runtime` (minutes), TV often has `episode_run_time` (array of minutes)
+  const runtimeMinutes =
+    type === 'movie'
+      ? (typeof raw?.runtime === 'number' ? raw.runtime : null)
+      : (Array.isArray(raw?.episode_run_time) && typeof raw.episode_run_time[0] === 'number'
+          ? raw.episode_run_time[0]
+          : null);
+  
+  const genres = Array.isArray(raw?.genres)
+    ? raw.genres.map((g) => g?.name).filter(Boolean)
+    : [];
+
   return {
     id: raw?.id,
     type,
@@ -29,16 +46,44 @@ function normalizeDetails(raw, type) {
     overview: raw?.overview || '',
     year,
     rating,
+    runtimeMinutes,
     genres,
     posterPath: raw?.poster_path || null,
     backdropPath: raw?.backdrop_path || null,
   };
 }
 
+function normalizeCast(credits) {
+  const castArr = Array.isArray(credits?.cast) ? credits.cast : [];
+  return castArr
+    .filter((c) => c?.name) // keep valid
+    .slice(0, 6)
+    .map((c) => ({
+      id: c.id,
+      name: c.name,
+      character: c.character || '',
+      profilePath: c.profile_path || null,
+    }));
+}
+
+function formatRuntime(minutes) {
+  if (typeof minutes !== 'number' || !Number.isFinite(minutes) || minutes <= 0) return '';
+  const h = Math.floor(minutes / 60);
+  const m = minutes % 60;
+  if (h <= 0) return `${minutes}m`;
+  if (m === 0) return `${h}h`;
+  return `${h}h ${m}m`;
+}
+
 export default function DetailScreen({ route, navigation }) {
   const { id, type } = route.params || {};
   const { addToWatchlist, removeFromWatchlist, isInWatchlist } = useWatchlist();
+
+  const { theme } = useTheme();
+  const colors = theme === 'dark' ? darkTheme : lightTheme;
+
   const [data, setData] = useState(null);
+  const [cast, setCast] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
 
@@ -48,14 +93,24 @@ export default function DetailScreen({ route, navigation }) {
       setLoading(false);
       return;
     }
+
     try {
       setLoading(true);
       setError('');
-      const raw = type === 'movie' ? await tmdb.movieDetails(id) : await tmdb.tvDetails(id);
-      setData(normalizeDetails(raw, type));
+
+      // fetch details + credits in parallel
+      const [rawDetails, rawCredits] =
+        type === 'movie'
+          ? await Promise.all([tmdb.movieDetails(id), tmdb.movieCredits(id)])
+          : await Promise.all([tmdb.tvDetails(id), tmdb.tvCredits(id)]);
+
+      const normalized = normalizeDetails(rawDetails, type);
+      setData(normalized);
+      setCast(normalizeCast(rawCredits));
     } catch (e) {
       setError(e?.message || 'Failed to load details.');
       setData(null);
+      setCast([]);
     } finally {
       setLoading(false);
     }
@@ -66,7 +121,7 @@ export default function DetailScreen({ route, navigation }) {
   }, [fetchDetails]);
 
   useEffect(() => {
-    navigation.setOptions({ title: data?.title || "Details" });
+    navigation.setOptions({ title: data?.title || 'Details' });
   }, [data?.title, navigation]);
 
   const imageUrl = useMemo(() => {
@@ -85,6 +140,7 @@ export default function DetailScreen({ route, navigation }) {
 
   const toggleWatchlist = () => {
     if (!data) return;
+
     if (saved) {
       removeFromWatchlist(data.id, data.type);
       Haptics.impactAsync(Haptics.ImpactFeedbackStyle.Light).catch(() => {});
@@ -101,24 +157,47 @@ export default function DetailScreen({ route, navigation }) {
     }
   };
 
-  if (loading) {
+  const renderCast = ({ item }) => {
+    const profileUrl = item.profilePath
+      ? (img.w185?.(item.profilePath) ||
+          img.w200?.(item.profilePath) ||
+          img.w300?.(item.profilePath) ||
+          img.w500?.(item.profilePath) ||
+          img.original?.(item.profilePath))
+      : null;
+
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right']}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#e50914" />
-          <Text style={styles.muted}>Loading…</Text>
-        </View>
-      </SafeAreaView>
+      <View style={styles.castCard}>
+        {profileUrl ? (
+          <Image source={{ uri: profileUrl }} style={styles.castAvatar} />
+        ) : (
+          <View style={[styles.castAvatar, { backgroundColor: colors.card }, styles.castAvatarPlaceholder, { borderColor: colors.border }]}>
+            <Text style={[styles.castAvatarPlaceholderText, { color: colors.muted }]}>👤</Text>
+          </View>
+        )}
+        <Text style={[styles.castName, { color: colors.text }]} numberOfLines={1}>
+          {item.name}
+        </Text>
+        {!!item.character && (
+          <Text style={[styles.castRole, { color: colors.muted }]} numberOfLines={1}>
+            {item.character}
+          </Text>
+        )}
+      </View>
     );
+  };
+
+  if (loading) {
+    return <DetailSkeleton />;
   }
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right']}>
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={fetchDetails} activeOpacity={0.85}>
-            <Text style={styles.retryText}>Retry</Text>
+          <Text style={[styles.errorText, { color: colors.accent }]}>{error}</Text>
+          <TouchableOpacity style={[styles.retryBtn, { backgroundColor: colors.accent }]} onPress={fetchDetails} activeOpacity={0.85}>
+            <Text style={[styles.retryText, { color: colors.text }]}>Retry</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -127,44 +206,80 @@ export default function DetailScreen({ route, navigation }) {
 
   if (!data) {
     return (
-      <SafeAreaView style={styles.container} edges={['left', 'right']}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right']}>
         <View style={styles.center}>
-          <Text style={styles.muted}>No details found.</Text>
+          <Text style={[styles.muted, { color: colors.muted }]}>No details found.</Text>
         </View>
       </SafeAreaView>
     );
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={['left', 'right']}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={['left', 'right']}>
       <ScrollView showsVerticalScrollIndicator={false}>
         {imageUrl ? (
           <Image source={{ uri: imageUrl }} style={styles.hero} resizeMode="cover" />
         ) : (
-          <View style={[styles.hero, styles.heroPlaceholder]}>
-            <Text style={styles.heroPlaceholderText}>No Image</Text>
+          <View style={[styles.hero, { backgroundColor: colors.card }, styles.heroPlaceholder]}>
+            <Text style={[styles.heroPlaceholderText, { color: colors.muted }]}>No Image</Text>
           </View>
         )}
+
         <View style={styles.content}>
-          <Text style={styles.title}>{data.title}</Text>
+          <Text style={[styles.title, { color: colors.text }]}>{data.title}</Text>
+
           <View style={styles.metaRow}>
-            {data.rating != null && <Text style={styles.metaText}>⭐ {data.rating.toFixed(1)}</Text>}
-            {data.year && <Text style={styles.metaText}>{data.year}</Text>}
-            <Text style={styles.typeTag}>{data.type.toUpperCase()}</Text>
+            {data.rating != null && <Text style={[styles.metaText, { color: colors.muted }]}>⭐ {data.rating.toFixed(1)}</Text>}
+            {data.year && <Text style={[styles.metaText, { color: colors.muted }]}>{data.year}</Text>}
+            {data.runtimeMinutes ? (
+              <Text style={[styles.metaText, { color: colors.muted }]}>{formatRuntime(data.runtimeMinutes)}</Text>
+            ) : null}
+            <Text style={[styles.typeTag, { color: colors.muted, borderColor: colors.border }]}>
+              {data.type.toUpperCase()}
+            </Text>
           </View>
-          {genreText ? <Text style={styles.genres}>{genreText}</Text> : null}
+
+          {genreText ? <Text style={[styles.genres, { color: colors.muted }]}>{genreText}</Text> : null}
+
           <TouchableOpacity
-            style={[styles.watchBtn, saved && styles.watchBtnSaved]}
+            style={[
+              styles.watchBtn,
+              { backgroundColor: colors.accent },
+              saved && [styles.watchBtnSaved, { backgroundColor: colors.card, borderColor: colors.border }],
+            ]}
             onPress={toggleWatchlist}
             activeOpacity={0.85}
           >
-            <Text style={[styles.watchText, saved && styles.watchTextSaved]}>
-              {saved ? 'Remove from Watchlist' : 'Add to Watchlist'}
-            </Text>
+          <Text style={[styles.watchText, { color: colors.text }, saved && styles.watchTextSaved, saved && { color: colors.text }]}>
+            {saved ? 'Remove from Watchlist' : 'Add to Watchlist'}
+          </Text>
           </TouchableOpacity>
-          <Text style={styles.sectionTitle}>Overview</Text>
-          <Text style={styles.overview}>{data.overview || 'No overview available.'}</Text>
+
+          <Text style={[styles.sectionTitle, { color: colors.text }]}>Overview</Text>
+          <Text style={[styles.overview, { color: colors.muted }]}>
+            {data.overview || 'No overview available.'}
+          </Text>
+
+          {/* ✅ CAST SECTION */}
+          {cast.length ? (
+            <>
+              <View style={styles.castHeaderRow}>
+                <Text style={[styles.sectionTitle, { color: colors.text }]}>Cast</Text>
+                <Text style={[styles.castHint, { color: colors.muted }]}>Top {cast.length}</Text>
+              </View>
+
+              <FlatList
+                data={cast}
+                keyExtractor={(item) => String(item.id)}
+                renderItem={renderCast}
+                horizontal
+                showsHorizontalScrollIndicator={false}
+                contentContainerStyle={styles.castList}
+              />
+            </>
+          ) : null}
         </View>
+
         <View style={{ height: 24 }} />
       </ScrollView>
     </SafeAreaView>
@@ -172,39 +287,81 @@ export default function DetailScreen({ route, navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: '#0b0b0f' },
-  hero: { width: '100%', height: 360, backgroundColor: '#222226' },
+  container: { flex: 1 },
+
+  hero: { width: '100%', height: 360 },
+
   heroPlaceholder: { alignItems: 'center', justifyContent: 'center' },
-  heroPlaceholderText: { color: '#777', fontWeight: '700' },
+  heroPlaceholderText: { fontWeight: '700' },
+
   content: { padding: 16 },
-  title: { color: '#fff', fontSize: 22, fontWeight: '800', lineHeight: 28 },
+
+  title: { fontSize: 22, fontWeight: '800', lineHeight: 28 },
+
   metaRow: { flexDirection: 'row', alignItems: 'center', gap: 10, marginTop: 10, flexWrap: 'wrap' },
-  metaText: { color: '#9aa0a6', fontSize: 13 },
+  metaText: { fontSize: 13 },
+
   typeTag: {
-    color: '#9aa0a6',
     fontSize: 12,
     borderWidth: 1,
-    borderColor: '#44474b',
     paddingHorizontal: 10,
     paddingVertical: 4,
     borderRadius: 999,
   },
-  genres: { color: '#9aa0a6', marginTop: 8, fontSize: 13 },
+
+  genres: { marginTop: 8, fontSize: 13 },
+
   watchBtn: {
     marginTop: 14,
-    backgroundColor: '#e50914',
     paddingVertical: 12,
     borderRadius: 12,
     alignItems: 'center',
   },
-  watchBtnSaved: { backgroundColor: '#f4f4f5', borderWidth: 1, borderColor: '#e6e6e7' },
-  watchText: { color: '#fff', fontWeight: '800' },
-  watchTextSaved: { color: '#111' },
-  sectionTitle: { color: '#fff', fontSize: 16, fontWeight: '800', marginTop: 18, marginBottom: 8 },
-  overview: { color: '#d1d1d1', fontSize: 14, lineHeight: 20 },
+  watchBtnSaved: { borderWidth: 1 },
+
+  watchText: { fontWeight: '800' },
+  watchTextSaved: {},
+
+  sectionTitle: { fontSize: 16, fontWeight: '800', marginTop: 18, marginBottom: 8 },
+  overview: { fontSize: 14, lineHeight: 20 },
+
+  // Cast styles
+  castHeaderRow: {
+    marginTop: 18,
+    marginBottom: 8,
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  castHint: { fontSize: 12 },
+
+  castList: { paddingVertical: 6, paddingRight: 6 },
+
+  castCard: {
+    width: 86,
+    marginRight: 12,
+    alignItems: 'center',
+  },
+  castAvatar: {
+    width: 64,
+    height: 64,
+    borderRadius: 32,
+    backgroundColor: '#222226',
+  },
+  castAvatarPlaceholder: {
+    alignItems: 'center',
+    justifyContent: 'center',
+    borderWidth: 1,
+  },
+  castAvatarPlaceholderText: { fontSize: 18 },
+
+  castName: { marginTop: 8, fontSize: 12, fontWeight: '700' },
+  castRole: { marginTop: 2, fontSize: 11 },
+
   center: { flex: 1, alignItems: 'center', justifyContent: 'center', paddingHorizontal: 16 },
-  muted: { marginTop: 10, color: '#9aa0a6' },
-  errorText: { color: '#d11a2a', textAlign: 'center', marginBottom: 12 },
-  retryBtn: { backgroundColor: '#e50914', paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10 },
-  retryText: { color: '#fff', fontWeight: '800' },
+  muted: { marginTop: 10 },
+
+  errorText: { textAlign: 'center', marginBottom: 12 },
+  retryBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 10 },
+  retryText: { fontWeight: '800' },
 });

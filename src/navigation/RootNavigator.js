@@ -3,35 +3,46 @@ import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
 import TabsNavigator from "./TabsNavigator";
 import DetailScreen from "../screens/DetailScreen";
+import { useTheme } from "../state/theme/ThemeContext";
+import { darkTheme, lightTheme } from "../state/theme/colors";
 
 const Stack = createNativeStackNavigator();
 
 export default function RootNavigator() {
+  const { theme } = useTheme();
+  const colors = theme === "dark" ? darkTheme : lightTheme;
+
   return (
     <Stack.Navigator
       screenOptions={{
-        headerStyle: { backgroundColor: "#0b0b0f" },
-        headerTintColor: "#f5f5f5",
-        headerTitleStyle: { fontWeight: "700" },
+        headerStyle: {
+          backgroundColor: colors.background,
+        },
+        headerTintColor: colors.text,
+        headerTitleStyle: {
+          color: colors.text,
+          fontWeight: "800",
+        },
         headerTitleAlign: "center",
         headerShadowVisible: false,
         headerBackTitleVisible: false,
-        headerBackTitle: "",
       }}
     >
+      {/* Bottom tabs (Home / Search / Watchlist) */}
       <Stack.Screen
         name="Tabs"
         component={TabsNavigator}
-        options={{ headerShown: false, title: "" }}
+        options={{
+          headerShown: false,
+        }}
       />
 
+      {/* Details screen */}
       <Stack.Screen
         name="Detail"
         component={DetailScreen}
         options={{
-          title: "Details",
-          headerBackTitleVisible: false,
-          headerBackTitle: "",
+          title: "",
           headerBackButtonDisplayMode: "minimal",
         }}
       />

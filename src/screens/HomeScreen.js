@@ -13,8 +13,14 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 import { tmdb, img } from "../services/tmdb";
 import MediaCard from "../components/movie/MediaCard";
+import HomeSkeleton from "../components/skeleton/HomeSkeleton";
+import { useTheme } from "../state/theme/ThemeContext";
+import { darkTheme, lightTheme } from "../state/theme/colors";
 
 export default function HomeScreen({ navigation }) {
+  const { theme } = useTheme();
+  const colors = theme === "dark" ? darkTheme : lightTheme;
+
   const [popular, setPopular] = useState([]);
   const [trending, setTrending] = useState([]);
   const [topTV, setTopTV] = useState([]);
@@ -62,7 +68,7 @@ export default function HomeScreen({ navigation }) {
   function SectionHeader({ title }) {
     return (
       <View style={styles.sectionHeader}>
-        <Text style={styles.sectionTitle}>{title}</Text>
+        <Text style={[styles.sectionTitle, { color: colors.text }]}>{title}</Text>
       </View>
     );
   }
@@ -126,23 +132,17 @@ export default function HomeScreen({ navigation }) {
   );
 
   if (loading) {
-    return (
-      <SafeAreaView style={styles.container} edges={["left", "right"]}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={styles.muted}>Loading…</Text>
-        </View>
-      </SafeAreaView>
-    );
+    return <HomeSkeleton />;
   }
+  
 
   if (error) {
     return (
-      <SafeAreaView style={styles.container} edges={["left", "right"]}>
+      <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["left", "right"]}>
         <View style={styles.center}>
-          <Text style={styles.errorText}>{error}</Text>
-          <TouchableOpacity style={styles.retryBtn} onPress={fetchHome} activeOpacity={0.85}>
-            <Text style={styles.retryText}>Retry</Text>
+          <Text style={[styles.errorText, { color: colors.accent }]}>{error}</Text>
+          <TouchableOpacity style={[styles.retryBtn, { backgroundColor: colors.accent }]} onPress={fetchHome} activeOpacity={0.85}>
+            <Text style={[styles.retryText, { color: colors.text }]}>Retry</Text>
           </TouchableOpacity>
         </View>
       </SafeAreaView>
@@ -150,12 +150,12 @@ export default function HomeScreen({ navigation }) {
   }
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["left", "right"]}>
       <ScrollView
         showsVerticalScrollIndicator={false}
         contentContainerStyle={styles.scrollContent}
         refreshControl={
-          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor="#e50914" />
+          <RefreshControl refreshing={refreshing} onRefresh={onRefresh} tintColor={colors.accent} />
         }
       >
         <Section title="Popular Movies" data={popular} renderItem={renderPopular} />
@@ -167,16 +167,16 @@ export default function HomeScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0b0f" },
+  container: { flex: 1 },
 
   scrollContent: { paddingBottom: 100, paddingTop: 10 },
 
   center: { flex: 1, alignItems: "center", justifyContent: "center", paddingHorizontal: 16 },
-  muted: { marginTop: 10, color: "#9aa0a6" },
+  muted: { marginTop: 10 },
 
-  errorText: { color: "#ff5a5f", textAlign: "center", marginBottom: 12 },
-  retryBtn: { backgroundColor: "#e50914", paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
-  retryText: { color: "#fff", fontWeight: "900" },
+  errorText: { textAlign: "center", marginBottom: 12 },
+  retryBtn: { paddingHorizontal: 18, paddingVertical: 10, borderRadius: 12 },
+  retryText: { fontWeight: "900" },
 
   section: { marginTop: 22 },
 
@@ -189,7 +189,6 @@ const styles = StyleSheet.create({
   },
 
   sectionTitle: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "700",
   },

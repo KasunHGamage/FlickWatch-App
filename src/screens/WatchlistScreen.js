@@ -16,7 +16,13 @@ import { useWatchlist } from "../state/watchlist/WatchlistContext";
 import MediaCard from "../components/movie/MediaCard";
 import { img } from "../services/tmdb";
 
+import { useTheme } from "../state/theme/ThemeContext";
+import { darkTheme, lightTheme } from "../state/theme/colors";
+
 export default function WatchlistScreen({ navigation }) {
+  const { theme } = useTheme();
+  const colors = theme === "dark" ? darkTheme : lightTheme;
+
   const { watchlist, removeFromWatchlist } = useWatchlist();
   const [pendingRemove, setPendingRemove] = React.useState(null);
 
@@ -41,7 +47,7 @@ export default function WatchlistScreen({ navigation }) {
     const posterUrl = img.w500(item.posterPath);
 
     return (
-      <View style={styles.rowCard}>
+      <View style={[styles.rowCard, { backgroundColor: colors.card }]}>
         <TouchableOpacity
           style={styles.rowMain}
           onPress={() => goDetail(item)}
@@ -50,15 +56,15 @@ export default function WatchlistScreen({ navigation }) {
           {posterUrl ? (
             <Image source={{ uri: posterUrl }} style={styles.rowPoster} />
           ) : (
-            <View style={[styles.rowPoster, styles.rowPosterPlaceholder]}>
+            <View style={[styles.rowPoster, styles.rowPosterPlaceholder, { backgroundColor: colors.border }]}>
               <Text style={styles.rowPosterText}>No Image</Text>
             </View>
           )}
           <View style={styles.rowText}>
-            <Text style={styles.rowTitle} numberOfLines={1}>
+            <Text style={[styles.rowTitle, { color: colors.text }]} numberOfLines={1}>
               {item.title || "Untitled"}
             </Text>
-            <Text style={styles.rowSubtitle} numberOfLines={1}>
+            <Text style={[styles.rowSubtitle, { color: colors.muted }]} numberOfLines={1}>
               {subtitle}
             </Text>
           </View>
@@ -70,7 +76,7 @@ export default function WatchlistScreen({ navigation }) {
           hitSlop={{ top: 8, right: 8, bottom: 8, left: 8 }}
           accessibilityLabel="Remove from watchlist"
         >
-          <Ionicons name="trash-outline" size={22} color="#9aa0a6" />
+          <Ionicons name="trash-outline" size={22} color={colors.muted} />
         </TouchableOpacity>
       </View>
     );
@@ -79,15 +85,15 @@ export default function WatchlistScreen({ navigation }) {
   // If watchlist empty, show message
   const renderEmpty = () => (
     <View style={styles.emptyContainer}>
-      <Text style={styles.emptyText}>Your watchlist is empty.</Text>
-      <Text style={styles.emptySub}>
+      <Text style={[styles.emptyText, { color: colors.text }]}>Your watchlist is empty.</Text>
+      <Text style={[styles.emptySub, { color: colors.muted }]}>
         Start adding movies and shows to see them here.
       </Text>
     </View>
   );
 
   return (
-    <SafeAreaView style={styles.container} edges={["left", "right"]}>
+    <SafeAreaView style={[styles.container, { backgroundColor: colors.background }]} edges={["left", "right"]}>
       {watchlist.length ? (
         <FlatList
           data={watchlist}
@@ -105,24 +111,24 @@ export default function WatchlistScreen({ navigation }) {
         animationType="fade"
         onRequestClose={cancelRemove}
       >
-        <Pressable style={styles.modalBackdrop} onPress={cancelRemove}>
-          <Pressable style={styles.modalCard} onPress={() => {}}>
-            <Text style={styles.modalTitle}>Remove from watchlist?</Text>
-            <Text style={styles.modalBody}>
+        <Pressable style={[styles.modalBackdrop, { backgroundColor: 'rgba(0,0,0,0.55)' }]} onPress={cancelRemove}>
+          <Pressable style={[styles.modalCard, { backgroundColor: colors.card }]} onPress={() => {}}>
+            <Text style={[styles.modalTitle, { color: colors.text }]}>Remove from watchlist?</Text>
+            <Text style={[styles.modalBody, { color: colors.muted }]}>
               {pendingRemove?.title
                 ? `Remove "${pendingRemove.title}" from your watchlist?`
                 : "Remove this item from your watchlist?"}
             </Text>
             <View style={styles.modalActions}>
               <TouchableOpacity
-                style={[styles.modalButton, styles.modalCancel]}
+                style={[styles.modalButton, { backgroundColor: colors.border }]}
                 onPress={cancelRemove}
                 activeOpacity={0.85}
               >
-                <Text style={styles.modalCancelText}>Cancel</Text>
+                <Text style={[styles.modalCancelText, { color: colors.text }]}>Cancel</Text>
               </TouchableOpacity>
               <TouchableOpacity
-                style={[styles.modalButton, styles.modalRemove]}
+                style={[styles.modalButton, { backgroundColor: colors.accent }]}
                 onPress={handleRemove}
                 activeOpacity={0.85}
               >
@@ -137,7 +143,7 @@ export default function WatchlistScreen({ navigation }) {
 }
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: "#0b0b0f" },
+  container: { flex: 1 },
 
   listContent: {
     paddingVertical: 16,
@@ -147,7 +153,6 @@ const styles = StyleSheet.create({
   rowCard: {
     flexDirection: "row",
     alignItems: "center",
-    backgroundColor: "#1a1a1a",
     borderRadius: 22,
     padding: 14,
     marginBottom: 14,
@@ -161,14 +166,12 @@ const styles = StyleSheet.create({
     width: 64,
     height: 64,
     borderRadius: 16,
-    backgroundColor: "#15151a",
   },
   rowPosterPlaceholder: {
     alignItems: "center",
     justifyContent: "center",
   },
   rowPosterText: {
-    color: "#9aa0a6",
     fontSize: 10,
     fontWeight: "700",
   },
@@ -177,12 +180,10 @@ const styles = StyleSheet.create({
     flex: 1,
   },
   rowTitle: {
-    color: "#fff",
     fontSize: 16,
     fontWeight: "700",
   },
   rowSubtitle: {
-    color: "#9aa0a6",
     fontSize: 13,
     marginTop: 4,
     fontWeight: "600",
@@ -196,7 +197,6 @@ const styles = StyleSheet.create({
 
   modalBackdrop: {
     flex: 1,
-    backgroundColor: "rgba(0,0,0,0.55)",
     alignItems: "center",
     justifyContent: "center",
     padding: 24,
@@ -204,17 +204,14 @@ const styles = StyleSheet.create({
   modalCard: {
     width: "100%",
     maxWidth: 380,
-    backgroundColor: "#15151a",
     borderRadius: 20,
     padding: 20,
   },
   modalTitle: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "700",
   },
   modalBody: {
-    color: "#9aa0a6",
     fontSize: 14,
     marginTop: 8,
     lineHeight: 20,
@@ -231,17 +228,13 @@ const styles = StyleSheet.create({
     marginLeft: 10,
   },
   modalCancel: {
-    backgroundColor: "#222226",
   },
   modalCancelText: {
-    color: "#e6e6e7",
     fontWeight: "700",
   },
   modalRemove: {
-    backgroundColor: "#e50914",
   },
   modalRemoveText: {
-    color: "#fff",
     fontWeight: "800",
   },
 
@@ -252,13 +245,11 @@ const styles = StyleSheet.create({
     paddingHorizontal: 24,
   },
   emptyText: {
-    color: "#fff",
     fontSize: 18,
     fontWeight: "700",
     marginBottom: 6,
   },
   emptySub: {
-    color: "#9aa0a6",
     fontSize: 14,
     textAlign: "center",
   },

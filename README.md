@@ -117,6 +117,13 @@ npx expo start
 - Trailer playback support
 
 ---
+## 🧪 Testing
+
+Basic unit tests are implemented using **Jest** and **React Native Testing Library** to verify core logic such as watchlist state management (add, remove, check)..
+
+Run tests with:
+```bash
+npm test
 
 ## 👨‍💻 Author
 

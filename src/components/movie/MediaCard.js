@@ -1,5 +1,7 @@
 import React from "react";
 import { View, Text, Image, StyleSheet, TouchableOpacity } from "react-native";
+import { useTheme } from "../../state/theme/ThemeContext";
+import { darkTheme, lightTheme } from "../../state/theme/colors";
 
 export default function MediaCard({
   posterUrl,
@@ -9,33 +11,43 @@ export default function MediaCard({
   onPress,
   style,
 }) {
+  const { theme } = useTheme();
+  const colors = theme === "dark" ? darkTheme : lightTheme;
   const Container = onPress ? TouchableOpacity : View;
   const ratingText = typeof rating === "number" ? rating.toFixed(1) : null;
 
   return (
-    <Container style={[styles.card, style]} onPress={onPress} activeOpacity={0.85}>
-      <View style={styles.posterWrap}>
+    <Container
+      style={[
+        styles.card,
+        { backgroundColor: colors.card, borderColor: colors.border },
+        style,
+      ]}
+      onPress={onPress}
+      activeOpacity={0.85}
+    >
+      <View style={[styles.posterWrap, { backgroundColor: colors.card }]}>
         {posterUrl ? (
           <Image source={{ uri: posterUrl }} style={styles.poster} resizeMode="cover" />
         ) : (
-          <View style={[styles.poster, styles.posterPlaceholder]}>
-            <Text style={styles.posterPlaceholderText}>No Image</Text>
+          <View style={[styles.poster, styles.posterPlaceholder, { backgroundColor: colors.card }]}>
+            <Text style={[styles.posterPlaceholderText, { color: colors.muted }]}>No Image</Text>
           </View>
         )}
 
         {ratingText ? (
-          <View style={styles.ratingBadge}>
-            <Text style={styles.ratingText}>★ {ratingText}</Text>
+          <View style={[styles.ratingBadge, { backgroundColor: colors.text }]}>
+            <Text style={[styles.ratingText, { color: colors.background }]}>★ {ratingText}</Text>
           </View>
         ) : null}
       </View>
 
       <View style={styles.info}>
-        <Text style={styles.title} numberOfLines={2}>
+        <Text style={[styles.title, { color: colors.text }]} numberOfLines={2}>
           {title || "Untitled"}
         </Text>
 
-        <Text style={styles.year} numberOfLines={1}>
+        <Text style={[styles.year, { color: colors.muted }]} numberOfLines={1}>
           {year || ""}
         </Text>
       </View>
@@ -46,18 +58,19 @@ export default function MediaCard({
 const styles = StyleSheet.create({
   card: {
     width: 140,
+    borderWidth: StyleSheet.hairlineWidth,
+    borderRadius: 16,
+    overflow: "hidden",
   },
 
   posterWrap: {
-    borderRadius: 18,
+    borderRadius: 16,
     overflow: "hidden",
-    backgroundColor: "#15151a",
   },
 
   poster: {
     width: "100%",
     height: 200,
-    backgroundColor: "#15151a",
   },
 
   posterPlaceholder: {
@@ -65,7 +78,6 @@ const styles = StyleSheet.create({
     justifyContent: "center",
   },
   posterPlaceholderText: {
-    color: "#9aa0a6",
     fontSize: 12,
     fontWeight: "700",
   },
@@ -80,24 +92,22 @@ const styles = StyleSheet.create({
     borderRadius: 999,
   },
   ratingText: {
-    color: "#fff",
     fontSize: 12,
     fontWeight: "800",
   },
 
   info: {
-    marginTop: 10,
+    paddingHorizontal: 12,
+    paddingTop: 10,
+    paddingBottom: 12,
   },
   title: {
-    color: "#fff",
     fontSize: 14,
     fontWeight: "700",
     lineHeight: 18,
-    minHeight: 36,
   },
   year: {
-    marginTop: 4,
-    color: "#9aa0a6",
+    marginTop: 6,
     fontSize: 12,
     fontWeight: "600",
   },
