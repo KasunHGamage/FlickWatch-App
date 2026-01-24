@@ -4,21 +4,21 @@
 ![React Navigation](https://img.shields.io/badge/React_Navigation-6B46C1?style=for-the-badge&logo=react&logoColor=white)
 ![TMDB](https://img.shields.io/badge/TMDB-0D253F?style=for-the-badge&logo=themoviedatabase&logoColor=01B4E4)
 
-FlickWatch is a modern **movie & TV discovery mobile app** built using **React Native (Expo)** and powered by the **TMDB API**.  
-Users can browse popular content, explore trending movies and TV shows, search titles, and manage a personal watchlist — all in a clean **dark-themed UI**.
+FlickWatch is a sleek **movie & TV discovery app** built with **React Native (Expo)** and powered by the **TMDB API**.  
+Browse popular titles, explore trending movies and shows, search instantly, and curate a personal watchlist — all in a polished **dark UI**.
 
 ---
 
 ## ✨ Features
 
-- 🔥 Browse **Popular Movies**
+- 🔥 Discover **Popular Movies**
 - 📈 Explore **Trending Movies & TV Shows**
-- ⭐ View **Top Rated TV Shows**
-- 🔍 Search movies & TV shows in real time
-- ❤️ Add / remove items from a **Watchlist**
-- 💾 Persistent watchlist using local storage
-- 🌙 Fully **Dark Mode UI**
-- 📱 Works on **Android & iOS**
+- ⭐ Browse **Top Rated TV Shows**
+- 🔍 Real-time **Search** for movies and series
+- ❤️ Add/remove items in a **Watchlist**
+- 💾 Persistent watchlist with local storage
+- 🌙 Consistent **Dark Mode UI**
+- 📱 Runs on **Android & iOS**
 
 ---
 
@@ -28,15 +28,13 @@ Users can browse popular content, explore trending movies and TV shows, search t
 - **React Navigation** (Stack + Bottom Tabs)
 - **Axios** (API requests)
 - **TMDB API**
-- **Context API** (Global state management)
-- **AsyncStorage** (Persistent watchlist)
+- **Context API** (Global state)
+- **AsyncStorage** (Persistence)
 - **JavaScript (ES6+)**
 
 ---
 
 ## 🔑 Environment Variables
-
-This project uses environment variables to keep API keys secure.
 
 Create a `.env` file in the project root:
 
@@ -44,7 +42,7 @@ Create a `.env` file in the project root:
 EXPO_PUBLIC_TMDB_API_KEY=your_tmdb_api_key_here
 ```
 
-⚠️ Important: The `.env` file is ignored by GitHub and should never be committed.
+⚠️ The `.env` file is ignored by Git and should never be committed.
 
 ---
 
@@ -69,7 +67,7 @@ npm install
 npx expo start
 ```
 
-- Scan the QR code using Expo Go on your phone
+- Scan the QR code using Expo Go
 - Or run on an Android emulator / iOS simulator
 
 ---
@@ -96,15 +94,16 @@ npx expo start
   <img src="./screenshots/watchlist.PNG" alt="Watchlist Screen" width="260" />
 </p>
 
+---
 
 ## 🧠 Learning Outcomes
 
 - API integration in React Native
-- Building reusable UI components
-- Global state management using Context API
+- Reusable UI component patterns
+- Global state with Context API
 - Navigation using Stack & Bottom Tabs
-- Implementing a clean dark-mode UI
-- Handling loading, error, and empty states
+- Clean dark-mode UI design
+- Loading, error, and empty states
 
 ---
 
@@ -117,13 +116,17 @@ npx expo start
 - Trailer playback support
 
 ---
+
 ## 🧪 Testing
 
-Basic unit tests are implemented using **Jest** and **React Native Testing Library** to verify core logic such as watchlist state management (add, remove, check)..
+Basic unit tests are implemented using **Jest** and **React Native Testing Library** to verify core logic like watchlist add/remove/check.
 
 Run tests with:
 ```bash
 npm test
+```
+
+---
 
 ## 👨‍💻 Author
 
