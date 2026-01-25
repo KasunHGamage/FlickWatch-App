@@ -1,9 +1,3 @@
-Got you 👍
-Here is the FULL README.md as a single clean Markdown code block, ready to copy–paste directly.
-
-⸻
-
-
 # 🎬 FlickWatch
 
 ![Expo](https://img.shields.io/badge/Expo-000000?style=for-the-badge&logo=expo&logoColor=white)
